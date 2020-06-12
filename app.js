@@ -4,10 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const bodyParser = require('body-parser');
-const Joi = require('joi');
+const Joi = require('@hapi/joi');
 
 var indexRouter = require('./routes/index');
-
 
 var app = express();
 
