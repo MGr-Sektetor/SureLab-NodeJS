@@ -3,8 +3,9 @@ var express = require('express');
 var path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
+const Joi = require('joi');
 var indexRouter = require('./routes/index');
+
 
 var app = express();
 
@@ -38,16 +39,53 @@ app.get('/api/v1/media/:guid', async (req,res)=> {
 
 //Vložení Media
 app.post('/api/v1/media', async (req,res)=> {
-  const media = req.body;
-  all_media.push(media);
 
-  res.send('Media Added');
+  //Kontrola schematu + error
+  const { error } = validateMedia(req.body); // result.error
+  if (error != null) {
+    res.send(error.details).sendStatus(400);
+    console.log("Nedodrzeni sablony")
+    return;
+  }
+
+  const media = {
+    guid: req.body.guid,
+    title: req.body.title,
+    type: req.body.type,
+    kind: req.body.kind,
+    number_of_discs: req.body.number_of_discs,
+    release_year: req.body.release_year
+  };
+  all_media.push(media);
+  res.send(media);
 });
 
 //Uprava Media
 app.put('/api/v1/media/:guid', async (req,res)=> {
+  //Validace
+  const media = all_media.find(c => c.guid === req.params.guid);
+  if(!media) res.status(404).send("Media record was not found")
 
-  const guid = req.params.guid;
+
+
+  //Kontrola schematu + error
+  const { error } = validateMedia(req.body); // result.error
+  if (error != null) {
+    res.send(error.details).sendStatus(400);
+    console.log("Nedodrzeni sablony")
+    return;
+  }
+
+  //Update
+  media.title = req.body.title;
+  media.type = req.body.type;
+  media.kind = req.body.kind;
+  media.number_of_discs = req.body.number_of_discs;
+  media.release_year = req.body.release_year;
+  res.send(media);
+
+/*
+ const guid = req.params.guid;
   const newMedia = req.body;
 
 for (let i = 0; i < all_media.length; i++) {
@@ -57,9 +95,19 @@ for (let i = 0; i < all_media.length; i++) {
   }else{
     res.status(404).send('Media record was not found');
   }
-}
-  res.send('Media is edited');
+}*/
 });
+
+function validateMedia(media){
+  const schema = {
+    title:Joi.string().required(),
+    type:Joi.string().required(),
+    kind:Joi.string().required(),
+    number_of_discs:Joi.integer.required(),
+    release_year:Joi.integer.required(),
+  }
+  return Joi.validate(media, schema);
+}
 
 //Odstraneni media podle GUID
 app.delete('/api/v1/media/:guid', async (req,res)=> {
@@ -76,6 +124,8 @@ app.delete('/api/v1/media/:guid', async (req,res)=> {
 
   res.send('Media is deleted');
 });
+
+
 /*
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -98,6 +148,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
 */
 module.exports = app;
