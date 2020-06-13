@@ -72,7 +72,7 @@ app.post('/api/v1/media', async(req,res)=> {
 
 //Validace
   const result = schema.validate(req.body)
-  if (result.error != null) {
+  //if (result.error != null) {
   //Vlozeni
     const media = {
       guid: req.body.guid,
@@ -84,12 +84,12 @@ app.post('/api/v1/media', async(req,res)=> {
     };
     all_media.push(media);
     res.send(media);
-  }else{
+  /*}else{
     console.log(result.error.details);
     res.send(result.error.details).sendStatus(400);
     console.log("Nedodrzeni sablony")
     return;
-  }
+  }*/
 
 
 });
