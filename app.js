@@ -52,23 +52,36 @@ app.get('/api/v1/media/:guid', async (req,res)=> {
 app.post('/api/v1/media', async (req,res)=> {
 
   //Kontrola schematu + error
-  const { error } = validateMedia(req.body); // result.error
-  if (error != null) {
-    res.send(error.details).sendStatus(400);
+  const schema = Joi.object({
+    guid:Joi.string().required(),
+    title:Joi.string().required(),
+    type:Joi.string().required(),
+    kind:Joi.string().required(),
+    number_of_discs:Joi.number().integer(),
+    release_year:Joi.number().integer().min(1900),
+  }).required();
+
+
+  const result = schema.validate(req.body)
+  if (result.error != null) {
+
+    const media = {
+      guid: req.body.guid,
+      title: req.body.title,
+      type: req.body.type,
+      kind: req.body.kind,
+      number_of_discs: req.body.number_of_discs,
+      release_year: req.body.release_year
+    };
+    all_media.push(media);
+    res.send(media);
+  }else{
+    res.send(result.error.details).sendStatus(400);
     console.log("Nedodrzeni sablony")
     return;
   }
 
-  const media = {
-    guid: req.body.guid,
-    title: req.body.title,
-    type: req.body.type,
-    kind: req.body.kind,
-    number_of_discs: req.body.number_of_discs,
-    release_year: req.body.release_year
-  };
-  all_media.push(media);
-  res.send(media);
+
 });
 
 //Uprava Media
@@ -77,23 +90,32 @@ app.put('/api/v1/media/:guid', async (req,res)=> {
   const media = all_media.find(c => c.guid === req.params.guid);
   if(!media) res.status(404).send("Media record was not found")
 
+  const schema = Joi.object({
+    guid:Joi.string().required(),
+    title:Joi.string().required(),
+    type:Joi.string().required(),
+    kind:Joi.string().required(),
+    number_of_discs:Joi.number().integer(),
+    release_year:Joi.number().integer().min(1900),
+  }).required();
 
 
-  //Kontrola schematu + error
-  const { error } = validateMedia(req.body); // result.error
-  if (error != null) {
-    res.send(error.details).sendStatus(400);
+  const result = schema.validate(req.body)
+  if (result.error != null) {
+    media.title = req.body.title;
+    media.type = req.body.type;
+    media.kind = req.body.kind;
+    media.number_of_discs = req.body.number_of_discs;
+    media.release_year = req.body.release_year;
+    res.send(media);
+  }else{
+    res.send(result.error.details).sendStatus(400);
     console.log("Nedodrzeni sablony")
     return;
   }
 
   //Update
-  media.title = req.body.title;
-  media.type = req.body.type;
-  media.kind = req.body.kind;
-  media.number_of_discs = req.body.number_of_discs;
-  media.release_year = req.body.release_year;
-  res.send(media);
+
 
   /*
    const guid = req.params.guid;
@@ -109,16 +131,21 @@ app.put('/api/v1/media/:guid', async (req,res)=> {
   }*/
 });
 
+
+/* Nefunguje
 function validateMedia(media){
-  const schema = {
+  const schema = Joi.object({
+    guid:Joi.string().required(),
     title:Joi.string().required(),
     type:Joi.string().required(),
     kind:Joi.string().required(),
-    number_of_discs:Joi.integer,
-    release_year:Joi.integer,
-  }
-  return Joi.validate(media, schema);
+    number_of_discs:Joi.number().integer(),
+    release_year:Joi.number().integer().min(1900),
+  }).required();
+  return schema.validate(media, schema);
 }
+*/
+
 
 //Odstraneni media podle GUID
 app.delete('/api/v1/media/:guid', async (req,res)=> {
@@ -132,7 +159,6 @@ app.delete('/api/v1/media/:guid', async (req,res)=> {
     res.status(404).send('Media record was not found');
     return false;
   });
-
   res.send('Media is deleted');
 });
 
