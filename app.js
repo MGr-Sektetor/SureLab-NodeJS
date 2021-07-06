@@ -26,9 +26,9 @@ app.use('/', indexRouter);
 // Všechny media
 let all_media = [{
   "guid":"458676886786-asfa878646566586",
-  "title":"Penis",
-  "type":"kokot",
-  "kind":"curak",
+  "title":"tessst",
+  "type":"tessst",
+  "kind":"tesssst",
   "number_of_discs":2020,
   "release_year":2019
 },{
